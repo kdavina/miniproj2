@@ -3,7 +3,9 @@ Mini Project 2
 
 Group members:
 Amanda Nguyen - amanda6
+
 Davina Kam - dkam
+
 Nan Ponnusamy - ponnusam
 
 There was no collaboration in the completion of this project.
