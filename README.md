@@ -1,7 +1,7 @@
 CMPUT291 - Fall 2019
 Mini Project 2
 
-Group members:
+Group members:  
 Amanda Nguyen - amanda6  
 Davina Kam - dkam  
 Nan Ponnusamy - ponnusam  
