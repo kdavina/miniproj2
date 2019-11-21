@@ -20,34 +20,17 @@ def main():
 
     for row_index in range(len(row_numbers)):
 
+        # create terms.txt
         create_term_file(subjects, bodies, row_index, row_numbers, terms_file)
 
-        # generate emails.txt
-        if len(from_emails[row_index])>0:
-            sep_f_emails = from_emails[row_index].split(',')
-            for f_email in sep_f_emails:
-                emails_file.write('from-' + f_email + ':' + row_numbers[row_index] + '\n')
+        # create emails.txt
+        create_email_file(from_emails, to_emails, cc_emails, bcc_emails, row_index, row_numbers, emails_file)
         
-        if len(to_emails[row_index])>0:
-            sep_to_emails = to_emails[row_index].split(',')
-            for to_email in sep_to_emails:
-                emails_file.write('to-'+ to_email + ':' + row_numbers[row_index] + '\n')
+    # create dates.txt
+    create_date_file(filename,row_numbers)
 
-        if len(cc_emails[row_index])>0:
-            sep_cc_emails = cc_emails[row_index].split(',')
-            for cc_email in sep_cc_emails:
-                emails_file.write('cc-'+ cc_email + ':' + row_numbers[row_index] + '\n')
-        
-        if len(bcc_emails[row_index])>0:
-            sep_bcc_emails = bcc_emails[row_index].split(',')
-            for bcc_email in sep_bcc_emails:
-                emails_file.write('bcc-'+ bcc_email + ':' + row_numbers[row_index] + '\n')
-
-    #creating date file 
-    date_file(filename,row_numbers)
-
-    #creating rec file
-    record_file(filename, row_numbers)
+    # create recs.txt
+    create_record_file(filename, row_numbers)
 
     terms_file.close()
     emails_file.close()
@@ -75,9 +58,30 @@ def create_term_file(subjects, bodies, row_index, row_numbers, terms_file):
         for body in split_body:
             if len(body)>2:
                 terms_file.write('b-' + body.lower() + ':' + row_numbers[row_index] + '\n')
+
+def create_email_file(from_emails, to_emails, cc_emails, bcc_emails, row_index, row_numbers, emails_file):
+    if len(from_emails[row_index])>0:
+        sep_f_emails = from_emails[row_index].split(',')
+        for f_email in sep_f_emails:
+            emails_file.write('from-' + f_email.lower() + ':' + row_numbers[row_index] + '\n')
+    
+    if len(to_emails[row_index])>0:
+        sep_to_emails = to_emails[row_index].split(',')
+        for to_email in sep_to_emails:
+            emails_file.write('to-'+ to_email.lower() + ':' + row_numbers[row_index] + '\n')
+
+    if len(cc_emails[row_index])>0:
+        sep_cc_emails = cc_emails[row_index].split(',')
+        for cc_email in sep_cc_emails:
+            emails_file.write('cc-'+ cc_email.lower() + ':' + row_numbers[row_index] + '\n')
+    
+    if len(bcc_emails[row_index])>0:
+        sep_bcc_emails = bcc_emails[row_index].split(',')
+        for bcc_email in sep_bcc_emails:
+            emails_file.write('bcc-'+ bcc_email.lower() + ':' + row_numbers[row_index] + '\n')
         
 
-def date_file(filename, row_numbers):
+def create_date_file(filename, row_numbers):
     i = 0
     with open(filename, "r") as inputfile:
         for line in inputfile:
@@ -86,7 +90,7 @@ def date_file(filename, row_numbers):
                 dates_file.write(result.group(1)+':'+row_numbers[i]+'\n')
                 i += 1  
 
-def record_file(filename, row_numbers):
+def create_record_file(filename, row_numbers):
     i= 0 
     with open(filename, "r") as inputfile:
         for line in inputfile:
