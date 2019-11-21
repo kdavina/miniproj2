@@ -27,8 +27,17 @@ for row_index in range(len(row_numbers)):
             terms_file.write('b-' + body.lower() + ':' + row_numbers[row_index] + '\n')
     
     # generate emails.txt
+    if len(from_emails[row_index])>0:
+        emails_file.write('from-' + from_emails[row_index] + ':' + row_numbers[row_index] + '\n')
     
+    if len(to_emails[row_index])>0:
+        emails_file.write('to-'+ to_emails[row_index] + ':' + row_numbers[row_index] + '\n')
 
+    if len(cc_emails[row_index])>0:
+         emails_file.write('cc-'+ cc_emails[row_index] + ':' + row_numbers[row_index] + '\n')
+        
+    if len(bcc_emails[row_index])>0:
+        emails_file.write('bcc-'+ bcc_emails[row_index] + ':' + row_numbers[row_index] + '\n')
 
 terms_file.close()
 emails_file.close()
