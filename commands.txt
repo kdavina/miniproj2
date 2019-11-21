@@ -1,0 +1,7 @@
+sort -u -o dates.txt dates.txt
+sort -un -o recs.txt recs.txt
+sort -u emails.txt emails.txt
+db_load -f recs.txt -T -t hash re.idx
+
+
+
