@@ -1,12 +1,13 @@
 import re 
 
+terms_file = open('terms.txt','w')
+emails_file = open('emails.txt', 'w')
+dates_file = open('dates.txt', 'w')
+recs_file = open('recs.txt','w')
+
 def main():
     filename = 'test10.xml'
     xml_content = open(filename).read()
-    terms_file = open('terms.txt','w')
-    emails_file = open('emails.txt', 'w')
-    dates_file = open('dates.txt', 'w')
-    recs_file = open('recs.txt','w')
 
     # parse the row number, subject, body, emails, dates, and records into different lists
     row_numbers = re.findall('<row>(.*)</row>', xml_content)
@@ -41,48 +42,45 @@ def main():
             for to_email in sep_to_emails:
                 emails_file.write('to-'+ to_email + ':' + row_numbers[row_index] + '\n')
 
+        if len(cc_emails[row_index])>0:
+            sep_cc_emails = cc_emails[row_index].split(',')
+            for cc_email in sep_cc_emails:
+                emails_file.write('cc-'+ cc_email + ':' + row_numbers[row_index] + '\n')
+        
+        if len(bcc_emails[row_index])>0:
+            sep_bcc_emails = bcc_emails[row_index].split(',')
+            for bcc_email in sep_bcc_emails:
+                emails_file.write('bcc-'+ bcc_email + ':' + row_numbers[row_index] + '\n')
+
     terms_file.close()
 
     #creating date file 
-    dates = re.findall('<date>(.*)</date>', xml_content)
-    for index in range(len(row_numbers)): 
-        date_file.write(dates[index]+':'+row_numbers[index]+'\n')
-    
-    date_file.close()
+    date_file(filename,row_numbers)
 
     #creating rec file
-    i = 0
-    with open(filename, "r") as inputfile:
-        for line in inputfile:
-            result = re.search('<mail>(.*)</mail>', line)
-            if result != None:
-                recs_file.write(row_numbers[i] +':'+result.group(0)+'\n')
-                i += 1 
-    recs_file.close()
-
-
-    #need the i in order to keep track of indexing for row numbers
-    i = 0
-    with open(filename, "r") as inputfile:
-        for line in inputfile:
-            result = re.search('<mail>(.*)</mail>', line)
-            if result != None:
-                recs_file.write(row_numbers[i] +':'+result.group(0)+'\n')
-                i += 1 
-        
-            if len(cc_emails[row_index])>0:
-                sep_cc_emails = cc_emails[row_index].split(',')
-                for cc_email in sep_cc_emails:
-                    emails_file.write('cc-'+ cc_email + ':' + row_numbers[row_index] + '\n')
-                
-            if len(bcc_emails[row_index])>0:
-                sep_bcc_emails = bcc_emails[row_index].split(',')
-                for bcc_email in sep_bcc_emails:
-                    emails_file.write('bcc-'+ bcc_email + ':' + row_numbers[row_index] + '\n')
+    record_file(filename, row_numbers)
 
     terms_file.close()
     emails_file.close()
     dates_file.close()
     recs_file.close()
 
+
+def date_file(filename, row_numbers):
+    i = 0
+    with open(filename, "r") as inputfile:
+        for line in inputfile:
+            result = re.search('<date>(.*)</date>', line)
+            if result != None:
+                dates_file.write(result.group(1)+':'+row_numbers[i]+'\n')
+                i += 1  
+
+def record_file(filename, row_numbers):
+    i= 0 
+    with open(filename, "r") as inputfile:
+        for line in inputfile:
+            result = re.search('<mail>(.*)</mail>', line)
+            if result != None:
+                recs_file.write(row_numbers[i] +':'+result.group(0)+'\n')
+                i += 1 
 main()
