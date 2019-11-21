@@ -1,24 +1,21 @@
-
-sort -u -o emails.txt 
-sort -u -o terms.txt terms.txt
-
-sort -u emails.txt emails.txt
-db_load -f recs.txt -T -t hash re.idx
-
-# this is for records
+# Commands to generate re.idx
 sort -un -o recs.txt recs.txt  
-
-# this is final version  
+# Use one of the following two lines, > doesn't print output to terminal
 perl break.pl< recs.txt > new_recs.txt
-
-#this is for testing  
 perl break.pl< recs.txt | tee new_recs.txt
+#final command to generate re.idx
 db_load -f new_recs.txt -T -t hash re.idx
 
-# this is for dates
+# Commands to generate dates.idx
 sort -u -o dates.txt dates.txt
-perl break.pl<recs.txt>new_dates.txt
-db_load -f new_dates.txt -T -t hash re.idx
+perl break.pl < dates.txt > new_dates.txt
+db_load -f new_dates.txt -T -t btree da.idx
+
+# Commands to generate terms.idx
+sort -u -o terms.txt terms.txt
+perl break.pl < terms.txt > new_terms.txt
+db_load -f new_terms.txt -T -t btree te.idx
 
 
-
+# Commands to generate emails.idx
+sort -u -o emails.txt emails.txt
