@@ -6,7 +6,7 @@ dates_file = open('dates.txt', 'w')
 recs_file = open('recs.txt','w')
 
 def main():
-    filename = 'test1000.xml'
+    filename = 'test10.xml'
     xml_content = open(filename).read()
 
     # parse the row number, subject, body, emails, dates, and records into different lists
