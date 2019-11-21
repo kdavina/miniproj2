@@ -54,11 +54,13 @@ def main():
 
     terms_file.close()
 
-    #creating date file 
-    date_file(filename,row_numbers)
+    # creating date and record file
+    index = 0
+    with open(filename, "r") as inputfile:
+        for line in inputfile:
+            date_file(line, row_numbers, index)
+            record_file(line, row_numbers, index)
 
-    #creating rec file
-    record_file(filename, row_numbers)
 
     terms_file.close()
     emails_file.close()
@@ -66,21 +68,13 @@ def main():
     recs_file.close()
 
 
-def date_file(filename, row_numbers):
-    i = 0
-    with open(filename, "r") as inputfile:
-        for line in inputfile:
-            result = re.search('<date>(.*)</date>', line)
-            if result != None:
-                dates_file.write(result.group(1)+':'+row_numbers[i]+'\n')
-                i += 1  
+def date_file(line, row_numbers, index):
+    result = re.search('<date>(.*)</date>', line)
+    if result != None:
+        dates_file.write(result.group(1)+':'+row_numbers[index]+'\n')
 
-def record_file(filename, row_numbers):
-    i= 0 
-    with open(filename, "r") as inputfile:
-        for line in inputfile:
-            result = re.search('<mail>(.*)</mail>', line)
-            if result != None:
-                recs_file.write(row_numbers[i] +':'+result.group(0)+'\n')
-                i += 1 
+def record_file(line, row_numbers,index):
+    result = re.search('<mail>(.*)</mail>', line)
+    if result != None:
+        recs_file.write(row_numbers[index] +':'+result.group(0)+'\n')
 main()
