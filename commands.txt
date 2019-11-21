@@ -6,10 +6,10 @@ sort -u emails.txt emails.txt
 db_load -f recs.txt -T -t hash re.idx
 
 # this is for records
-sort -un -o recs.txt recs.txt
-# this is final version
+sort -un -o recs.txt recs.txt  
+# this is final version  
 perl break.pl< recs.txt > new_recs.txt
-#this is for testing
+#this is for testing  
 perl break.pl< recs.txt | tee new_recs.txt
 db_load -f new_recs.txt -T -t hash re.idx
 
