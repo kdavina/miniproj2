@@ -7,11 +7,10 @@ db_load -f recs.txt -T -t hash re.idx
 
 # this is for records
 sort -un -o recs.txt recs.txt
-<<<<<<< HEAD
+# this is final version
 perl break.pl< recs.txt > new_recs.txt
-=======
+#this is for testing
 perl break.pl< recs.txt | tee new_recs.txt
->>>>>>> c46360e33f1d4d01575708e62824b63ef891cf19
 db_load -f new_recs.txt -T -t hash re.idx
 
 # this is for dates
