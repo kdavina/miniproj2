@@ -6,7 +6,7 @@ dates_file = open('dates.txt', 'w')
 recs_file = open('recs.txt','w')
 
 def main():
-    filename = 'test10.xml'
+    filename = 'test1000.xml'
     xml_content = open(filename).read()
 
     # parse the row number, subject, body, emails, dates, and records into different lists
@@ -19,18 +19,9 @@ def main():
     bcc_emails = re.findall('<bcc>(.*)</bcc>', xml_content)
 
     for row_index in range(len(row_numbers)):
-        # generate terms.txt
-        subjects[row_index] = subjects[row_index].replace('&lt','>')
 
-        split_subject = re.split('[^0-9a-zA-Z_-]',subjects[row_index])
-        split_body = re.split('[^0-9a-zA-Z_-]', bodies[row_index])
-        for term in split_subject:
-            if len(term)>2:
-                terms_file.write('s-' + term.lower() + ':' + row_numbers[row_index] + '\n')
-        for body in split_body:
-            if len(body)>2:
-                terms_file.write('b-' + body.lower() + ':' + row_numbers[row_index] + '\n')
-        
+        create_term_file(subjects, bodies, row_index, row_numbers, terms_file)
+
         # generate emails.txt
         if len(from_emails[row_index])>0:
             sep_f_emails = from_emails[row_index].split(',')
@@ -52,8 +43,6 @@ def main():
             for bcc_email in sep_bcc_emails:
                 emails_file.write('bcc-'+ bcc_email + ':' + row_numbers[row_index] + '\n')
 
-    terms_file.close()
-
     #creating date file 
     date_file(filename,row_numbers)
 
@@ -65,6 +54,28 @@ def main():
     dates_file.close()
     recs_file.close()
 
+def replace_char(to_replace):
+        to_replace = to_replace.replace('&#10','!') # #10 is actually a newline, replace with ! so it doesn't appear after future split 
+        to_replace = to_replace.replace('&lt','<')
+        to_replace = to_replace.replace('&gt','>')
+        to_replace = to_replace.replace('&amp','&')
+        to_replace = to_replace.replace('&apos','\'')
+        to_replace = to_replace.replace('&quot','"')
+        return to_replace
+
+def create_term_file(subjects, bodies, row_index, row_numbers, terms_file):
+        # generate terms.txt
+        subjects[row_index] = replace_char(subjects[row_index])
+        bodies[row_index] = replace_char(bodies[row_index])
+        split_subject = re.split('[^0-9a-zA-Z_-]',subjects[row_index])
+        split_body = re.split('[^0-9a-zA-Z_-]', bodies[row_index])
+        for term in split_subject:
+            if len(term)>2:
+                terms_file.write('s-' + term.lower() + ':' + row_numbers[row_index] + '\n')
+        for body in split_body:
+            if len(body)>2:
+                terms_file.write('b-' + body.lower() + ':' + row_numbers[row_index] + '\n')
+        
 
 def date_file(filename, row_numbers):
     i = 0
