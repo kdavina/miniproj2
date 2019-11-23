@@ -16,6 +16,7 @@ sort -u -o terms.txt terms.txt
 perl break.pl < terms.txt > new_terms.txt
 db_load -f new_terms.txt -T -t btree te.idx
 
-
 # Commands to generate emails.idx
 sort -u -o emails.txt emails.txt
+perl break.pl < emails.txt > new_emails.txt
+db_load -f new_emails.txt -T -t btree em.idx
