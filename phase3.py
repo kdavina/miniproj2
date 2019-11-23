@@ -14,3 +14,13 @@ da_database = db.DB()
 da_database.open("da.idx")
 da_curs = da_database.cursor()
 print(da_curs.first())
+
+te_database = db.DB()
+te_database.open("te.idx")
+te_curs = te_database.cursor()
+print(te_curs.first())
+
+em_database = db.DB()
+em_database.open("em.idx")
+em_curs = em_database.cursor()
+print(em_curs.first())
