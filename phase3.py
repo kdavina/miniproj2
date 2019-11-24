@@ -31,22 +31,30 @@ def main():
             break
 
         # get all the term queries
-        # OUR PARSER IN PROGRESS, CURRENTLY SELECTS ANYTHING FROM THE GROUP AND ONLY PRINTS THAT
         term_queries = re.findall('subj\s*:\s*[0-9a-zA-Z_-]+|body\s*:\s*[0-9a-zA-Z_-]+', query)
+        remove_whitespace(term_queries)
         print("term queries:", term_queries)
 
         # get all the date queries
         date_queries = re.findall('date\s*<\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*>\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*<=\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*>=\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*:\s*\d\d\d\d[/]\d\d[/]\d\d', query)
+        remove_whitespace(date_queries)
         print("date queries", date_queries)
 
         # get all the email address queries
         email_address_queries = re.findall('from\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|to\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|cc\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|bcc\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+', query)
+        remove_whitespace(date_queries)
         print("email address queries", email_address_queries)
 
         # get all single term queries
         # need something to check no date, cc, from, to, bcc, term at the beginning
         single_term_queries = re.findall('\Bsubj[0-9a-zA-Z_-]+%?', query)
+        remove_whitespace(single_term_queries)
         print("single term queries", single_term_queries)
+
+def remove_whitespace(replace_list):
+    for list_index in range(len(replace_list)):
+        replace_list[list_index] = replace_list[list_index].replace(" ","")
+    return replace_list
 
 
 main()
