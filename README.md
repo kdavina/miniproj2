@@ -15,3 +15,4 @@ https://www.programcreek.com/python/example/122/re.DOTALL
 https://stackoverflow.com/questions/20309456/call-a-function-from-another-file-in-python  
 https://www.youtube.com/watch?v=K8L6KVGG-7o  
 https://stackoverflow.com/questions/17022638/regex-match-string-not-starting-with-a-specific-word  
+https://stackoverflow.com/questions/38780361/regex-matching-multiple-exact-strings
