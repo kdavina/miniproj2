@@ -1,8 +1,5 @@
 from bsddb3 import db
 
-
-
-
 #document says we don't need to include db type if it already exists 
 # obviously database exists, so we don't need to include create
 re_database = db.DB()
