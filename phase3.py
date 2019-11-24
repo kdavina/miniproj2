@@ -25,29 +25,28 @@ def main():
     print(em_curs.first())
 
     while True:
-        query = input("Enter a query in the format of field_of_interest: Press q to exit. ")
-        query1 = 'subj:gas'
+        query = input("Enter a query in the format of field_of_interest: Press q to exit. ").lower()
         if query == 'q':
             break
 
         # get all the term queries
-        term_queries = re.findall('subj\s*:\s*[0-9a-zA-Z_-]+|body\s*:\s*[0-9a-zA-Z_-]+', query)
+        term_queries = re.findall('(?:subj|body)\s*:\s*[0-9a-zA-Z_-]+%?\s+', query, )
         remove_whitespace(term_queries)
         print("term queries:", term_queries)
 
         # get all the date queries
-        date_queries = re.findall('date\s*<\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*>\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*<=\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*>=\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*:\s*\d\d\d\d[/]\d\d[/]\d\d', query)
+        date_queries = re.findall('date\s*[<>:][=]?\s*\d\d\d\d[/]\d\d[/]\d\d\s+', query)
         remove_whitespace(date_queries)
         print("date queries", date_queries)
 
         # get all the email address queries
-        email_address_queries = re.findall('from\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|to\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|cc\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|bcc\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+', query)
+        email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
         remove_whitespace(date_queries)
         print("email address queries", email_address_queries)
 
         # get all single term queries
-        # need something to check no date, cc, from, to, bcc, term at the beginning
-        single_term_queries = re.findall('\Bsubj[0-9a-zA-Z_-]+%?', query)
+        # need something to check no date, cc, from, to, bcc
+        single_term_queries = re.findall('(?:subj|body|date|cc|from|to|bcc)[0-9a-zA-Z_-]+%?\s+', query)
         remove_whitespace(single_term_queries)
         print("single term queries", single_term_queries)
 
