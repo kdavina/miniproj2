@@ -25,8 +25,8 @@ def main():
     print(em_curs.first())
 
     while True:
-        query = input("Enter a query in the format of field_of_interest: Press q to exit. ").lower()
-        if query == 'q':
+        query = input("Enter a query in the format of field_of_interest: Press q to exit. ").lower() + ' '
+        if query == 'q ':
             break
 
         # get all the term queries
@@ -41,12 +41,12 @@ def main():
 
         # get all the email address queries
         email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
-        remove_whitespace(date_queries)
+        remove_whitespace(email_address_queries)
         print("email address queries", email_address_queries)
 
         # get all single term queries
         # need something to check no date, cc, from, to, bcc
-        single_term_queries = re.findall('(?:subj|body|date|cc|from|to|bcc)[0-9a-zA-Z_-]+%?\s+', query)
+        single_term_queries = re.findall('(?:!subj)[0-9a-zA-Z_-]+%?\s+', query)
         remove_whitespace(single_term_queries)
         print("single term queries", single_term_queries)
 
