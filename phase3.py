@@ -33,8 +33,9 @@ def main():
             break
 
         # detect mode
-        output_mode = re.search('output[=](full|brief)\s+', query).group()
-        if output_mode:
+        o_output = re.search('output[=](full|brief)\s+', query)
+        if o_output:
+            output_mode = o_output.group()
             query = query.replace(output_mode,"")
             output_mode.replace(" ","")
             output_mode = output_mode[7:]
@@ -65,8 +66,8 @@ def main():
         for s_t_query in single_term_queries:
             query = query.replace(s_t_query, "")
         single_term_queries = remove_whitespace(single_term_queries)
-        print("single term queries", single_term_queries)
         correct_term_queries.extend(single_term_queries)
+        print("single term queries", single_term_queries)
        
         query = query.replace(" ","")
 
@@ -104,13 +105,15 @@ def final_results(rows, mode):
         if mode == 'brief':
             output = re.search('<subj>(.*)</subj>', result[1].decode("utf-8"))
             subject = output.group(1)
+            subject = replace_char(subject)
             if subject == '':
                 subject = 'No subject found'
             print('\nRow: '+terms+'\nSubject: '+subject)
 
         else:
             print('\nRow: '+terms)
-            print(result[1].decode("utf-8"))
+            result[1] = replace_char(result[1].decode("utf-8"))
+            print(result[1])
 
     print('\n')
 
@@ -345,7 +348,14 @@ def greater_date(date, equals_bool):
    
     return new_list
 
-
+def replace_char(to_replace):
+        to_replace = to_replace.replace('&#10','\n')         
+        to_replace = to_replace.replace('&lt','<')
+        to_replace = to_replace.replace('&gt','>')
+        to_replace = to_replace.replace('&amp','&')
+        to_replace = to_replace.replace('&apos','\'')
+        to_replace = to_replace.replace('&quot','"')
+        return to_replace
     
 
 main()
