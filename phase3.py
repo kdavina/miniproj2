@@ -116,7 +116,7 @@ def termQuery():
     for i in term_queries:
         if ":" in i:
             terms = i.split(":")
-            print(terms)
+            #print(terms)
             if terms[0] == "subj":
                 if "%" == terms[1][-1]:
                     partial_term = "s-" + terms[1][:-1]
@@ -125,7 +125,7 @@ def termQuery():
                 else:
                     terms[0] = "s-" + terms[1]
                     del terms[1]
-                    print(terms)
+                    #print(terms)
             elif terms[0] == "body":
                 if "%" == terms[1][-1]:
                     partial_term = "b-" + terms[1][:-1]
@@ -134,33 +134,35 @@ def termQuery():
                 else:
                     terms[0] = "b-" + terms[1]
                     del terms[1]
-                    print(terms)
+                    #print(terms)
             # else:
             #     #this else statement will never run since term_queries has already been checked for input validity
             #     print("Invalid entry")
         elif "%" in i:
-            i = i[:-1]
-            partial_term = [("s-"+i), ("b-"+i)]
+            partial_term = "b-" + i[:-1]
+            partial_match(partial_term)
+            partial_term = "s-" + i[:-1]
             partial_match(partial_term)
             terms = []
         else:
-            terms = [("s-"+i), ("b-"+i)]
+            terms = [("b-"+i), ("s-"+i)]
             #terms[0] = "s-" + i
             #terms[1] = "b-" + i
-            print(terms)
+            #print(terms)
         
         for j in terms:
             new_list.append(j)
     
-    print("List of all indexes:", new_list)
+    print("\n", "List of all exact terms:", new_list)
 
+    results = []
     for key in new_list:
         index = te_curs.set(key.encode("utf-8"))
-        print("index val:", index)
-        results = []
+        #print("index val:", index)
         if index != None:
             recID = (index[1].decode("utf-8"))
             results.append(recID)
+            #print("index in here?-->", results)
         dup = te_curs.next_dup()
         while(dup!=None):
             duplicates = (dup[1].decode("utf-8"))
@@ -171,19 +173,18 @@ def termQuery():
         
             
             results.append(duplicates)
-            print("print recIDs:", results)
+    print("Print record IDs for exact matches:", results, "\n\n")
 
 
 def partial_match(partial_term):
-
+    print("\n\n", "This is the partial term parsed into partial match func:", partial_term)
     partial_recID = []
-    print("in partial matching for term:", partial_term)
     
     index = te_curs.set_range((partial_term[0].encode("utf-8")))
     #index = te_database.get(partial_term[0].encode("utf-8"))
-    print(index)
+    print("Results of curs.set_range:", index)
     while index:
-        print("partial match to this key from te.idx:", index[0][:len(partial_term[0])].decode("utf-8"))
+        print("Try to match part of index key to partial term using:", index[0][:len(partial_term)].decode("utf-8"), "\n")
         if index[0][:len(partial_term[0])].decode("utf-8") == partial_term:
             partial_recID.append(index[1].decode("utf-8"))
             print("Partial matches:", partial_term)
