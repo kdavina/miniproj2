@@ -77,7 +77,9 @@ def main():
              continue
 
         # ------------- WRITE ALL YOUR FUNCTIONS HERE ---------------
-        termQuery()
+        term_rows = termQuery(correct_term_queries)
+        if term_rows:
+            final_rows.append(term_rows)
 
         email_rows = email_query(correct_email_address_queries)
         if email_rows:
@@ -124,7 +126,7 @@ def remove_whitespace(replace_list):
 
 
 def termQuery():
-    term_queries = ['subj:gas', 'body:the', 'subj:clos%', 'body:west%', 'from%', 'closing']
+    term_queries = ['subj:gas', 'body:the', 'subj:clos%', 'body:west%', 'fro%', 'closing']
     print("term_queries:", term_queries)
     new_list = []
     for i in term_queries:
@@ -187,24 +189,33 @@ def termQuery():
         
             
             results.append(duplicates)
+    
+    #partials = partial_match(partial_match)
+    #if partials:
+     #   results.append(partials)
+        
     print("Print record IDs for exact matches:", results, "\n\n")
+    return results
 
 
 def partial_match(partial_term):
-    print("\n\n", "This is the partial term parsed into partial match func:", partial_term)
-    partial_recID = []
+    #print("\n\n", "This is the partial term parsed into partial match func:", partial_term)
+    results_partial = []
     
-    index = te_curs.set_range((partial_term[0].encode("utf-8")))
-    #index = te_database.get(partial_term[0].encode("utf-8"))
-    print("Results of curs.set_range:", index)
+    index = te_curs.set_range((partial_term.encode("utf-8")))
+    #index = te_database.get((partial_term[0].encode("utf-8")))
+    #print("Results of curs.set_range:", index)
     while index:
-        print("Try to match part of index key to partial term using:", index[0][:len(partial_term)].decode("utf-8"), "\n")
-        if index[0][:len(partial_term[0])].decode("utf-8") == partial_term:
-            partial_recID.append(index[1].decode("utf-8"))
-            print("Partial matches:", partial_term)
+        #print("Try to match part of index key to partial term using:", index[0][:len(partial_term)].decode("utf-8"), "\n")
+        if index[0][:len(partial_term)].decode("utf-8") == partial_term:
+            results_partial.append(index[1].decode("utf-8"))
+            #print("Partial matches:", partial_term)
             index = te_curs.next()
         else:
             break
+    
+    print("Print record IDs for partial matches:", results_partial, "\n\n") 
+    return results_partial
 
 # depending on the word, I replaced the values to match the xml file
 # then passed the newly formatted email into my find email function
