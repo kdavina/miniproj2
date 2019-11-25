@@ -178,12 +178,13 @@ def partial_match(partial_term):
 
     partial_recID = []
     print("in partial matching for term:", partial_term)
+    
     index = te_curs.set_range((partial_term[0].encode("utf-8")))
     #index = te_database.get(partial_term[0].encode("utf-8"))
     print(index)
-    
     while index:
-        if index[0][:len(partial_term)].decode("utf-8") == partial_term:
+        print("partial match to this key from te.idx:", index[0][:len(partial_term[0])].decode("utf-8"))
+        if index[0][:len(partial_term[0])].decode("utf-8") == partial_term:
             partial_recID.append(index[1].decode("utf-8"))
             print("Partial matches:", partial_term)
             index = te_curs.next()
