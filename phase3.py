@@ -28,46 +28,65 @@ def main():
 
     while True:
         query = input("Enter a query in the format of field_of_interest: Press q to exit. ").lower() + ' '
-        query = ' ' + query
-        if query == ' q ':
+        if query == 'q ':
             break
 
         # get all the term queries
-        correct_term_queries = re.findall('(?:subj|body)\s*:\s*[0-9a-zA-Z_-]+%?\s+', query, )
-        all_term_queries = re.findall('subj|body', query)
-        if len(correct_term_queries) != len(all_term_queries):
-            print("Incorrect query syntax")
-            continue
-        remove_whitespace(correct_term_queries)
+        correct_term_queries = re.findall('(?:subj|body)\s*:\s*[0-9a-zA-Z_-]+%?\s+', query)
+        for t_query in correct_term_queries:
+            query = query.replace(t_query, "")
+        # all_term_queries = re.findall('\s+(?:subj|body)\s*', query)
+        # if len(correct_term_queries) != len(all_term_queries):
+        #     print("Incorrect query syntax")
+        #     continue
+        correct_term_queries = remove_whitespace(correct_term_queries)
         print("term queries", correct_term_queries)
 
         # get all the date queries
         correct_date_queries = re.findall('date\s*[<>:][=]?\s*\d\d\d\d[/]\d\d[/]\d\d\s+', query)
-        all_date_queries = re.findall('date', query)
-        if len(correct_date_queries) != len(all_date_queries):
-            print("Incorrect query syntax")
-            continue
-        remove_whitespace(correct_date_queries)
+        for d_query in correct_date_queries:
+            query = query.replace(d_query, "")
+        # all_date_queries = re.findall('\s+date\s*', query)
+        # if len(correct_date_queries) != len(all_date_queries):
+        #     print("Incorrect query syntax")
+        #     continue
+        correct_date_queries = remove_whitespace(correct_date_queries)
         print("date queries", correct_date_queries)
         date_rows = dates_query(correct_date_queries)
 
         # get all the email address queries
         correct_email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
-        all_email_address_queries = re.findall('from|to|cc|bcc', query)
-        if len(correct_email_address_queries) != len(all_email_address_queries):
-            print("Incorrect query syntax")
-            continue
-        remove_whitespace(correct_email_address_queries)
+        for ad_query in correct_email_address_queries:
+            query = query.replace(ad_query, "")
+        # all_email_address_queries = re.findall('\s+(?:from|to|cc|bcc)\s*', query)
+        # if len(correct_email_address_queries) != len(all_email_address_queries):
+        #     print("correct length:",len(correct_email_address_queries))
+        #     print("all_length", len(all_email_address_queries))
+        #     print("Incorrect query syntax")
+        #     continue
+        correct_email_address_queries = remove_whitespace(correct_email_address_queries)
         print("email address queries", correct_email_address_queries)
 
         # get all single term queries
         # need something to check no date, cc, from, to, bcc
         #pattern = re.compile("([0-9a-zA-Z_%-])\s+([0-9a-zA-Z_-]+%?)\s+")
         #single_term_queries = pattern.sub(r'\2', query)
-        single_term_queries = re.findall('(?<![:]\s*)([0-9a-zA-Z_-]+%?)\s+', query)
-        remove_whitespace(single_term_queries)
+        single_term_queries = re.findall('[0-9a-zA-Z_-]+%?\s+', query)
+        for s_t_query in single_term_queries:
+            query = query.replace(s_t_query, "")
+        single_term_queries = remove_whitespace(single_term_queries)
         print("single term queries", single_term_queries)
 
+        query = query.replace(" ","")
+       
+        if len(query) > 0:
+             print("query", query)
+             print("Syntax Error")
+             continue
+
+        # ------------- WRITE ALL YOUR FUNCTIONS HERE ---------------
+        
+        
         final_results(date_rows, False)
 
 
