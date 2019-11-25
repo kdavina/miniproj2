@@ -16,3 +16,9 @@ https://stackoverflow.com/questions/20309456/call-a-function-from-another-file-i
 https://www.youtube.com/watch?v=K8L6KVGG-7o  
 https://stackoverflow.com/questions/17022638/regex-match-string-not-starting-with-a-specific-word  
 https://stackoverflow.com/questions/38780361/regex-matching-multiple-exact-strings
+https://docs.python.org/2/library/re.html
+https://stackoverflow.com/questions/18168684/parsing-xml-in-python-with-regex
+https://www.geeksforgeeks.org/sort-command-linuxunix-examples/
+https://stackoverflow.com/questions/3138649/programmatically-read-from-stdin-or-input-file-in-perl
+https://stackoverflow.com/questions/45361968/how-do-i-make-the-stdin-in-the-array-stop-perl
+https://www.geeksforgeeks.org/intersection-function-python/
