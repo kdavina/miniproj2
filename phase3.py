@@ -25,20 +25,24 @@ em_database.open("em.idx")
 em_curs = em_database.cursor()
 
 def main():
-
+    output_mode = 'brief'
+    final_rows = []
     while True:
-        query = input("Enter a query in the format of field_of_interest: Press q to exit. ").lower() + ' '
+        query = input("Enter a query. Press q to exit. ").lower() + ' '
         if query == 'q ':
             break
+
+        # detect mode
+        output_mode = re.search('output[=](full|brief)\s+', query).group()
+        if output_mode:
+            query = query.replace(output_mode,"")
+            output_mode.replace(" ","")
+            output_mode = output_mode[7:]
 
         # get all the term queries
         correct_term_queries = re.findall('(?:subj|body)\s*:\s*[0-9a-zA-Z_-]+%?\s+', query)
         for t_query in correct_term_queries:
             query = query.replace(t_query, "")
-        # all_term_queries = re.findall('\s+(?:subj|body)\s*', query)
-        # if len(correct_term_queries) != len(all_term_queries):
-        #     print("Incorrect query syntax")
-        #     continue
         correct_term_queries = remove_whitespace(correct_term_queries)
         print("term queries", correct_term_queries)
 
@@ -46,63 +50,161 @@ def main():
         correct_date_queries = re.findall('date\s*[<>:][=]?\s*\d\d\d\d[/]\d\d[/]\d\d\s+', query)
         for d_query in correct_date_queries:
             query = query.replace(d_query, "")
-        # all_date_queries = re.findall('\s+date\s*', query)
-        # if len(correct_date_queries) != len(all_date_queries):
-        #     print("Incorrect query syntax")
-        #     continue
         correct_date_queries = remove_whitespace(correct_date_queries)
         print("date queries", correct_date_queries)
-        date_rows = dates_query(correct_date_queries)
 
         # get all the email address queries
         correct_email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
         for ad_query in correct_email_address_queries:
             query = query.replace(ad_query, "")
-        # all_email_address_queries = re.findall('\s+(?:from|to|cc|bcc)\s*', query)
-        # if len(correct_email_address_queries) != len(all_email_address_queries):
-        #     print("correct length:",len(correct_email_address_queries))
-        #     print("all_length", len(all_email_address_queries))
-        #     print("Incorrect query syntax")
-        #     continue
         correct_email_address_queries = remove_whitespace(correct_email_address_queries)
         print("email address queries", correct_email_address_queries)
 
         # get all single term queries
-        # need something to check no date, cc, from, to, bcc
-        #pattern = re.compile("([0-9a-zA-Z_%-])\s+([0-9a-zA-Z_-]+%?)\s+")
-        #single_term_queries = pattern.sub(r'\2', query)
         single_term_queries = re.findall('[0-9a-zA-Z_-]+%?\s+', query)
         for s_t_query in single_term_queries:
             query = query.replace(s_t_query, "")
         single_term_queries = remove_whitespace(single_term_queries)
         print("single term queries", single_term_queries)
-
-        query = query.replace(" ","")
+        correct_term_queries.extend(single_term_queries)
        
+        query = query.replace(" ","")
+
         if len(query) > 0:
              print("query", query)
              print("Syntax Error")
              continue
 
         # ------------- WRITE ALL YOUR FUNCTIONS HERE ---------------
+        termQuery()
+
+        email_rows = email_query(correct_email_address_queries)
+        if email_rows:
+            final_rows.append(email_rows)
+
+        date_rows = dates_query(correct_date_queries)
+        if date_rows:
+            final_rows.append(date_rows)
         
-        
-        final_results(date_rows, False)
+        #this is the intersection part, you may get a combination where they all return nothing
+        if len(final_rows) == 0:
+            print('No results with those conditions')
+            continue
+        else:
+            while len(final_rows) > 1:
+                final_rows[0] = list(set(final_rows[0]) & set(final_rows[1]))
+                del final_rows[1]
+            
+            final_results(final_rows[0], output_mode)
 
 
 def final_results(rows, mode):
     for terms in rows:
         result = re_curs.set(terms.encode("utf-8"))
-        if not mode:
+        if mode == 'brief':
             output = re.search('<subj>(.*)</subj>', result[1].decode("utf-8"))
             subject = output.group(1)
+            if subject == '':
+                subject = 'No subject found'
             print('\nRow: '+terms+'\nSubject: '+subject)
+
+        else:
+            print('\nRow: '+terms)
+            print(result[1].decode("utf-8"))
+
+    print('\n')
 
 def remove_whitespace(replace_list):
     for list_index in range(len(replace_list)):
         replace_list[list_index] = replace_list[list_index].replace(" ","")
     return replace_list
 
+
+def termQuery():
+    term_queries = ['subj:gas', 'body:the', 'subj:clos%', 'body:west%', 'from%', 'closing']
+    print("term_queries:", term_queries)
+    new_list = []
+    for i in term_queries:
+        if ":" in i:
+            terms = i.split(":")
+            #print(terms)
+            if terms[0] == "subj":
+                if "%" == terms[1][-1]:
+                    partial_term = "s-" + terms[1][:-1]
+                    partial_match(partial_term)
+                    terms = []
+                else:
+                    terms[0] = "s-" + terms[1]
+                    del terms[1]
+                    #print(terms)
+            elif terms[0] == "body":
+                if "%" == terms[1][-1]:
+                    partial_term = "b-" + terms[1][:-1]
+                    partial_match(partial_term)
+                    terms = []
+                else:
+                    terms[0] = "b-" + terms[1]
+                    del terms[1]
+                    #print(terms)
+            # else:
+            #     #this else statement will never run since term_queries has already been checked for input validity
+            #     print("Invalid entry")
+        elif "%" in i:
+            partial_term = "b-" + i[:-1]
+            partial_match(partial_term)
+            partial_term = "s-" + i[:-1]
+            partial_match(partial_term)
+            terms = []
+        else:
+            terms = [("b-"+i), ("s-"+i)]
+            #terms[0] = "s-" + i
+            #terms[1] = "b-" + i
+            #print(terms)
+        
+        for j in terms:
+            new_list.append(j)
+    
+    print("\n", "List of all exact terms:", new_list)
+
+    results = []
+    for key in new_list:
+        index = te_curs.set(key.encode("utf-8"))
+        #print("index val:", index)
+        if index != None:
+            recID = (index[1].decode("utf-8"))
+            results.append(recID)
+            #print("index in here?-->", results)
+        dup = te_curs.next_dup()
+        while(dup!=None):
+            duplicates = (dup[1].decode("utf-8"))
+            #print(duplicates)
+            dup = te_curs.next_dup()
+            #dup = te_curs.next_dup()
+            #print(dup[0].decode("utf-8"))
+        
+            
+            results.append(duplicates)
+    print("Print record IDs for exact matches:", results, "\n\n")
+
+
+def partial_match(partial_term):
+    print("\n\n", "This is the partial term parsed into partial match func:", partial_term)
+    partial_recID = []
+    
+    index = te_curs.set_range((partial_term[0].encode("utf-8")))
+    #index = te_database.get(partial_term[0].encode("utf-8"))
+    print("Results of curs.set_range:", index)
+    while index:
+        print("Try to match part of index key to partial term using:", index[0][:len(partial_term)].decode("utf-8"), "\n")
+        if index[0][:len(partial_term[0])].decode("utf-8") == partial_term:
+            partial_recID.append(index[1].decode("utf-8"))
+            print("Partial matches:", partial_term)
+            index = te_curs.next()
+        else:
+            break
+
+# depending on the word, I replaced the values to match the xml file
+# then passed the newly formatted email into my find email function
 def email_query(email):
     final_list = []
     for terms in email:
@@ -118,16 +220,24 @@ def email_query(email):
         elif 'bcc' in terms:
             parsed_email = re.sub('bcc:', 'bcc-', terms)
             email_rows = find_email(parsed_email)
-            
+        
+        # this is the part where i check for intersection
+        # first if nothing is in final list we add our first term into it
         if not final_list:
             final_list += email_rows
+        # breaking down: set gets rid of duplicates within its own list
+        # doing the & symbol looks for which values appears in both sets
+        # by the end we should only have values that appear in both so set it as a list again
         else:
             final_list = list(set(final_list) & set(email_rows))
 
         
     return final_list
 
-            
+# email is correctly formatted to our xml file
+# since email is our key, we only need to run through cursor duplicates and nothing else
+# if we find the match, we append it to a new list
+# by the end of it we should have a list of index numbers that correspond to that email (and respective to,from, cc, bcc)
 def find_email(email):
     new_list = []
     result = em_curs.set(email.encode("utf-8"))
@@ -146,20 +256,23 @@ def dates_query(dates_queries):
     final_list = []
     for terms in dates_queries:
         if ':' in terms:
-            date_row = exact_date(terms[5:15])
+            date_row = exact_date(terms[5:])
         elif '<' in terms and '=' not in terms:
-            date_row = less_date(terms[5:15], False)
+            date_row = less_date(terms[5:], False)
         elif '<' in terms and '=' in terms:
-            date_row = less_date(terms[6:16], True)
+            date_row = less_date(terms[6:], True)
 
         elif '>' in terms and '=' not in terms:
-            date_row = greater_date(terms[5:15], False)
+            date_row = greater_date(terms[5:], False)
 
         elif '>' in terms and '=' in terms:
-            date_row = greater_date(terms[6:16], True)
+            date_row = greater_date(terms[6:], True)
 
+        # this is the part where i check for intersection
+        # first if nothing is in final list we add our first term into it
         if not final_list:
             final_list += date_row
+
         else:
             final_list = list(set(final_list) & set(date_row))
 
