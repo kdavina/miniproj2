@@ -61,7 +61,7 @@ def main():
             continue
         remove_whitespace(correct_email_address_queries)
         print("email address queries", correct_email_address_queries)
-        email_rows = email_query(email_address_queries)
+        email_rows = email_query(correct_email_address_queries)
         if email_rows:
             final_rows.append(email_rows)
 
@@ -69,16 +69,20 @@ def main():
         # need something to check no date, cc, from, to, bcc
         #pattern = re.compile("([0-9a-zA-Z_%-])\s+([0-9a-zA-Z_-]+%?)\s+")
         #single_term_queries = pattern.sub(r'\2', query)
-        single_term_queries = re.findall('(?<![:]\s*)([0-9a-zA-Z_-]+%?)\s+', query)
-        remove_whitespace(single_term_queries)
+        #single_term_queries = re.findall('(?<![:]\s*)([0-9a-zA-Z_-]+%?)\s+', query)
+        #remove_whitespace(single_term_queries)
         
-        #this is the intersection part
-        while len(final_rows) > 1:
-            final_rows[0] = list(set(final_rows[0]) & set(final_rows[1]))
-            del final_rows[1]
-        
-        # replace false with whatever variable you're setting output as davina
-        final_results(final_rows[0], False)
+        #this is the intersection part, you may get a combination where they all return nothing
+        if len(final_rows) == 0:
+            print('No results with those conditions')
+            continue
+        else:
+            while len(final_rows) > 1:
+                final_rows[0] = list(set(final_rows[0]) & set(final_rows[1]))
+                del final_rows[1]
+            
+            # replace false with whatever variable you're setting output as davina
+            final_results(final_rows[0], False)
 
 
 def final_results(rows, mode):
