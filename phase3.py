@@ -39,7 +39,6 @@ def main():
             print("Incorrect query syntax")
             continue
         remove_whitespace(correct_term_queries)
-        print("term queries", correct_term_queries)
 
         # get all the date queries
         correct_date_queries = re.findall('date\s*[<>:][=]?\s*\d\d\d\d[/]\d\d[/]\d\d\s+', query)
@@ -48,7 +47,6 @@ def main():
             print("Incorrect query syntax")
             continue
         remove_whitespace(correct_date_queries)
-        print("date queries", correct_date_queries)
         date_rows = dates_query(correct_date_queries)
         if date_rows:
             final_rows.append(date_rows)
@@ -71,7 +69,7 @@ def main():
         #single_term_queries = pattern.sub(r'\2', query)
         #single_term_queries = re.findall('(?<![:]\s*)([0-9a-zA-Z_-]+%?)\s+', query)
         #remove_whitespace(single_term_queries)
-        
+        single_term_query(['body:october%'])
         #this is the intersection part, you may get a combination where they all return nothing
         if len(final_rows) == 0:
             print('No results with those conditions')
@@ -84,6 +82,25 @@ def main():
             # replace false with whatever variable you're setting output as davina
             final_results(final_rows[0], False)
 
+def single_term_query(partial_term):
+    for term in partial_term:
+        if 'body' in term and "%" in term:
+            output = re.sub('body:', 'b-', term[:-1])
+            partial_list = find_term_match(output)
+    for index in partial_list:
+        print(index)
+
+def find_term_match(term):
+    new_list = []
+    result = te_curs.set_range(term.encode("utf-8"))
+    while result != None:
+        if result[1].decode("utf-8") in term:
+            new_list.append(result[1].decode("utf-8"))
+        else:
+            break
+        result = te_curs.next()
+
+    return new_list
 
 def final_results(rows, mode):
     for terms in rows:
