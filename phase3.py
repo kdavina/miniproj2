@@ -27,7 +27,6 @@ em_curs = em_database.cursor()
 def main():
     output_mode = 'brief'
     while True:
-        print("\n", "Current Output Mode:", output_mode)
         final_rows = []
         query = input("Enter a query. Press q to exit. ").lower() + ' '
         if query == 'q ':
@@ -52,22 +51,18 @@ def main():
         for t_query in correct_term_queries:
             query = query.replace(t_query, "")
         correct_term_queries = remove_whitespace(correct_term_queries)
-        print("term queries", correct_term_queries)
-        #changed 
         
         # get all the date queries
         correct_date_queries = re.findall('date\s*[<>:][=]?\s*\d\d\d\d[/]\d\d[/]\d\d\s+', query)
         for d_query in correct_date_queries:
             query = query.replace(d_query, "")
         correct_date_queries = remove_whitespace(correct_date_queries)
-        print("date queries", correct_date_queries)
 
         # get all the email address queries
         correct_email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_]+[.]?[0-9a-zA-Z-_]+[@][0-9a-zA-Z-_]+[.]?[0-9a-zA-Z-_]+\s+', query)
         for ad_query in correct_email_address_queries:
             query = query.replace(ad_query, "")
         correct_email_address_queries = remove_whitespace(correct_email_address_queries)
-        print("email address queries", correct_email_address_queries)
 
         # get all single term queries
         single_term_queries = re.findall('[0-9a-zA-Z_-]+%?\s+', query)
@@ -75,12 +70,12 @@ def main():
             query = query.replace(s_t_query, "")
         single_term_queries = remove_whitespace(single_term_queries)
         correct_term_queries.extend(single_term_queries)
-        print("single term queries", single_term_queries)
-       
+
+        # remove whitespaces
         query = query.replace(" ","")
 
+        # check that there is nothing left after removing queries with correct grammar
         if len(query) > 0:
-             print("query", query)
              print("Syntax Error")
              continue
 
@@ -91,8 +86,6 @@ def main():
         elif len(correct_term_queries) != 0 and len(term_rows) == 0:
             print("No results with those conditions")
             continue
-        
-        #partial_matches = partial_match(partial_term)
     
         #calculating email query
         # we have two conditions:
@@ -142,7 +135,6 @@ def final_results(rows, mode):
         # print out the output
         for terms in rows:
             result = re_curs.set(terms.encode("utf-8"))
-            print("output mode in final_results", mode)
             if  mode == 'brief':
                 output = re.search('<subj>(.*)</subj>', result[1].decode("utf-8"))
                 subject = output.group(1)
