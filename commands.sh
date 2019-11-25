@@ -1,4 +1,5 @@
 #run chmod +x commands.sh at first
+#run ./commands.sh
 sort -un -o recs.txt recs.txt  
 perl break.pl< recs.txt > new_recs.txt
 db_load -T -c dupsort=1 -f new_recs.txt -t hash re.idx
