@@ -27,28 +27,39 @@ em_curs = em_database.cursor()
 def main():
 
     while True:
+<<<<<<< HEAD
         final_rows = []
         query = input("Enter a query in the format of field_of_interest: Press q to exit. ")
         query1 = 'subj:gas'
         if query == 'q':
+=======
+        query = input("Enter a query in the format of field_of_interest: Press q to exit. ").lower() + ' '
+        if query == 'q ':
+>>>>>>> 5892cac7bbfe5c0eced75e6247f5298d4362f6ad
             break
 
         # get all the term queries
-        term_queries = re.findall('subj\s*:\s*[0-9a-zA-Z_-]+|body\s*:\s*[0-9a-zA-Z_-]+', query)
+        term_queries = re.findall('(?:subj|body)\s*:\s*[0-9a-zA-Z_-]+%?\s+', query, )
         remove_whitespace(term_queries)
 
         # get all the date queries
-        date_queries = re.findall('date\s*<\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*>\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*<=\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*>=\s*\d\d\d\d[/]\d\d[/]\d\d|date\s*:\s*\d\d\d\d[/]\d\d[/]\d\d', query)
+        date_queries = re.findall('date\s*[<>:][=]?\s*\d\d\d\d[/]\d\d[/]\d\d\s+', query)
         remove_whitespace(date_queries)
         date_rows = dates_query(date_queries)
 
         # get all the email address queries
+<<<<<<< HEAD
         email_address_queries = re.findall('from\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|to\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|cc\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|bcc\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+', query)
         remove_whitespace(date_queries)
+=======
+        email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
+        remove_whitespace(email_address_queries)
+        print("email address queries", email_address_queries)
+>>>>>>> 5892cac7bbfe5c0eced75e6247f5298d4362f6ad
 
         # get all single term queries
-        # need something to check no date, cc, from, to, bcc, term at the beginning
-        single_term_queries = re.findall('\Bsubj[0-9a-zA-Z_-]+%?', query)
+        # need something to check no date, cc, from, to, bcc
+        single_term_queries = re.findall('(?:!subj)[0-9a-zA-Z_-]+%?\s+', query)
         remove_whitespace(single_term_queries)
 
 def remove_whitespace(replace_list):
