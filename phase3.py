@@ -248,7 +248,7 @@ def termQuery(term_queries):
         # all exact terms to be searched on index file are added to term_list
         for j in terms:
             term_list.append(j)
-
+            
 
     duplicates = []
     # iterates through term_list and searches for index-key matches with any of the elements in term_list
@@ -257,10 +257,7 @@ def termQuery(term_queries):
         # if there is a match, decode the index value (record ID) for the given key and add to duplicates list
         if index != None:
             recID = (index[1].decode("utf-8"))
-            if not results:
-                results.append(recID)
-            elif recID not in duplicates:
-                duplicates.append(recID)
+            duplicates.append(recID)
             # next check for duplicates of record (same key, different record ID)
             dup = te_curs.next_dup()
             # if there are duplicates, decode index value (record ID) and add to duplicates table
@@ -269,7 +266,6 @@ def termQuery(term_queries):
                 if dup_index not in duplicates:
                     duplicates.append(dup_index)
                 dup = te_curs.next_dup()
-
 
             # if results list is empty, simply add the duplicates list to results
             # else, intersect the results list and the duplicates list to find intersecting record IDs
