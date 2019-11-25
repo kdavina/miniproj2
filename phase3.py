@@ -27,6 +27,7 @@ em_curs = em_database.cursor()
 def main():
     output_mode = 'brief'
     while True:
+        print("output mode rn", output_mode)
         final_rows = []
         query = input("Enter a query. Press q to exit. ").lower() + ' '
         if query == 'q ':
@@ -37,8 +38,13 @@ def main():
         if o_output:
             output_mode = o_output.group()
             query = query.replace(output_mode,"")
-            output_mode.replace(" ","")
+            output_mode = output_mode.replace(" ","")
             output_mode = output_mode[7:]
+            query = query.replace(" ","")
+            if len(query) > 0:
+                print("query", query)
+                print("Syntax Error")
+                continue
             continue
 
         # get all the term queries
@@ -143,7 +149,8 @@ def final_results(rows, mode):
         # print out the output
         for terms in rows:
             result = re_curs.set(terms.encode("utf-8"))
-            if mode == 'brief':
+            print("output mode in final_results", mode)
+            if  mode == 'brief':
                 output = re.search('<subj>(.*)</subj>', result[1].decode("utf-8"))
                 subject = output.group(1)
                 subject = replace_char(subject)
