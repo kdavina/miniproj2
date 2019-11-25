@@ -116,13 +116,13 @@ def main():
         if len(correct_date_queries) != 0 and len(date_rows)>0:
             final_rows.append(date_rows)
         elif len(correct_date_queries) != 0 and len(date_rows) == 0:
-            print("No results with those conditions")
+            print("\n")
             continue
     
         #this is the intersection part
         # if even after all the queries, final list is empty, do not search for rows and just print out a message
         if len(final_rows) == 0:
-            print('No results with those conditions')
+            print('\n')
         else:
             # each element of final_rows is a list corresponding to one of our calcualted queries
             # if there is more than one, that means we need to intersect them with each other
@@ -175,7 +175,8 @@ def termQuery(term_queries):
                     partial_term = "s-" + terms[1][:-1]
                     p1 = partial_match(partial_term)
                     if p1 and not results:
-                        results += p1
+                        # results += p1
+                        results.append(p1)
                     else:
                         results = list(set(results) & set(p1))
                     terms = []
@@ -228,6 +229,7 @@ def termQuery(term_queries):
 
     for key in term_list:
         index = te_curs.set(key.encode("utf-8"))
+        print(index)
         #print("index val:", index)
         if index != None:
             recID = (index[1].decode("utf-8"))
@@ -236,15 +238,15 @@ def termQuery(term_queries):
             else:
                 results = list(set(results) & set(recID))
             print("after including 1st result", results)
-        dup = te_curs.next_dup()
-        while(dup!=None):
-            duplicates = (dup[1].decode("utf-8"))
-            #print(duplicates)
             dup = te_curs.next_dup()
-            #dup = te_curs.next_dup()
-            #print(dup[0].decode("utf-8"))
-            print("before including duplicates:", results)
-        
+            while(dup!=None):
+                duplicates = (dup[1].decode("utf-8"))
+                #print(duplicates)
+                dup = te_curs.next_dup()
+                #dup = te_curs.next_dup()
+                #print(dup[0].decode("utf-8"))
+                print("before including duplicates:", results)
+            
             if not results:
                 results.append(duplicates)
             else:
