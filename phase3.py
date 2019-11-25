@@ -25,7 +25,7 @@ em_database.open("em.idx")
 em_curs = em_database.cursor()
 
 def main():
-
+    final_rows = []
     while True:
         query = input("Enter a query in the format of field_of_interest: Press q to exit. ").lower() + ' '
         query = ' ' + query
@@ -36,16 +36,19 @@ def main():
         term_queries = re.findall('(?:subj|body)\s*:\s*[0-9a-zA-Z_-]+%?\s+', query)
         remove_whitespace(term_queries)
 
-        # get all the date queries
+        # get all the date queries 
         date_queries = re.findall('date\s*[<>:][=]?\s*\d\d\d\d[/]\d\d[/]\d\d\s+', query)
         remove_whitespace(date_queries)
         date_rows = dates_query(date_queries)
+        if date_rows:
+            final_rows.append(date_rows)
 
         # email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
         email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*\S+\s+', query)
         remove_whitespace(email_address_queries)
         email_rows = email_query(email_address_queries)
-        print(email_rows)
+        if email_rows:
+            final_rows.append(email_rows)
 
         # get all single term queries
         # need something to check no date, cc, from, to, bcc
@@ -53,8 +56,14 @@ def main():
         #single_term_queries = pattern.sub(r'\2', query)
         single_term_queries = re.findall('[0-9a-zA-Z_%-]\s+([0-9a-zA-Z_-]+%?\s+)', query)
         remove_whitespace(single_term_queries)
-
-        final_results(date_rows, False)
+        
+        
+        while len(final_rows) > 1:
+            final_rows[0] = list(set(final_rows[0]) & set(final_rows[1]))
+            del final_rows[1]
+        
+        # replace false with whatever variable you're setting output as davina
+        final_results(final_rows[0], False)
 
 
 def final_results(rows, mode):
@@ -63,13 +72,23 @@ def final_results(rows, mode):
         if not mode:
             output = re.search('<subj>(.*)</subj>', result[1].decode("utf-8"))
             subject = output.group(1)
+            if subject == '':
+                subject = 'No subject found'
             print('\nRow: '+terms+'\nSubject: '+subject)
+
+        else:
+            print('\nRow: '+terms)
+            print(result[1].decode("utf-8"))
+
+    print('\n')
 
 def remove_whitespace(replace_list):
     for list_index in range(len(replace_list)):
         replace_list[list_index] = replace_list[list_index].replace(" ","")
     return replace_list
 
+# depending on the word, I replaced the values to match the xml file
+# then passed the newly formatted email into my find email function
 def email_query(email):
     final_list = []
     for terms in email:
@@ -85,16 +104,24 @@ def email_query(email):
         elif 'bcc' in terms:
             parsed_email = re.sub('bcc:', 'bcc-', terms)
             email_rows = find_email(parsed_email)
-            
+        
+        # this is the part where i check for intersection
+        # first if nothing is in final list we add our first term into it
         if not final_list:
             final_list += email_rows
+        # breaking down: set gets rid of duplicates within its own list
+        # doing the & symbol looks for which values appears in both sets
+        # by the end we should only have values that appear in both so set it as a list again
         else:
             final_list = list(set(final_list) & set(email_rows))
 
         
     return final_list
 
-            
+# email is correctly formatted to our xml file
+# since email is our key, we only need to run through cursor duplicates and nothing else
+# if we find the match, we append it to a new list
+# by the end of it we should have a list of index numbers that correspond to that email (and respective to,from, cc, bcc)
 def find_email(email):
     new_list = []
     result = em_curs.set(email.encode("utf-8"))
@@ -113,17 +140,17 @@ def dates_query(dates_queries):
     final_list = []
     for terms in dates_queries:
         if ':' in terms:
-            date_row = exact_date(terms[5:15])
+            date_row = exact_date(terms[5:])
         elif '<' in terms and '=' not in terms:
-            date_row = less_date(terms[5:15], False)
+            date_row = less_date(terms[5:], False)
         elif '<' in terms and '=' in terms:
-            date_row = less_date(terms[6:16], True)
+            date_row = less_date(terms[6:], True)
 
         elif '>' in terms and '=' not in terms:
-            date_row = greater_date(terms[5:15], False)
+            date_row = greater_date(terms[5:], False)
 
         elif '>' in terms and '=' in terms:
-            date_row = greater_date(terms[6:16], True)
+            date_row = greater_date(terms[6:], True)
 
         if not final_list:
             final_list += date_row
