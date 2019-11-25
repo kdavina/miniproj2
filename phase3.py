@@ -27,15 +27,8 @@ em_curs = em_database.cursor()
 def main():
 
     while True:
-<<<<<<< HEAD
-        final_rows = []
-        query = input("Enter a query in the format of field_of_interest: Press q to exit. ")
-        query1 = 'subj:gas'
-        if query == 'q':
-=======
         query = input("Enter a query in the format of field_of_interest: Press q to exit. ").lower() + ' '
         if query == 'q ':
->>>>>>> 5892cac7bbfe5c0eced75e6247f5298d4362f6ad
             break
 
         # get all the term queries
@@ -48,14 +41,8 @@ def main():
         date_rows = dates_query(date_queries)
 
         # get all the email address queries
-<<<<<<< HEAD
         email_address_queries = re.findall('from\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|to\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|cc\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+|bcc\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+', query)
         remove_whitespace(date_queries)
-=======
-        email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
-        remove_whitespace(email_address_queries)
-        print("email address queries", email_address_queries)
->>>>>>> 5892cac7bbfe5c0eced75e6247f5298d4362f6ad
 
         # get all single term queries
         # need something to check no date, cc, from, to, bcc
