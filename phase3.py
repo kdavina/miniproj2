@@ -138,7 +138,6 @@ def final_results(rows, mode):
             if  mode == 'brief':
                 output = re.search('<subj>(.*)</subj>', result[1].decode("utf-8"))
                 subject = output.group(1)
-                subject = replace_char(subject)
                 print('\nRow: '+terms+'\nSubject: '+subject)
 
             else:
@@ -446,14 +445,5 @@ def greater_date(date, equals_bool):
    
     return new_list
 
-def replace_char(to_replace):
-        to_replace = to_replace.replace('&#10','\n')         
-        to_replace = to_replace.replace('&lt','<')
-        to_replace = to_replace.replace('&gt','>')
-        to_replace = to_replace.replace('&amp','&')
-        to_replace = to_replace.replace('&apos','\'')
-        to_replace = to_replace.replace('&quot','"')
-        return to_replace
-    
 
 main()
