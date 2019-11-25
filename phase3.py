@@ -213,11 +213,11 @@ def termQuery(term_queries):
             #print(dup[0].decode("utf-8"))
             print("before including duplicates:", results)
         
-            if not results:
-                results.append(duplicates)
-            else:
-                results = list(set(results) & set(duplicates))
-                print("after including duplicates:", results)    
+           # if not results:
+            results.append(duplicates)
+            #else:
+               # results = list(set(results) & set(duplicates))
+            print("after including duplicates:", results)    
 
     print("\n", "Printing partial match results first, then exact match results:", "\n", results, "\n\n")    
     return results
