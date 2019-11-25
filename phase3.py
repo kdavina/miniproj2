@@ -423,9 +423,9 @@ def greater_date(date, equals_bool):
         #checking for duplicates
         dup = da_curs.next_dup()
         while dup != None:
-            if dup[0].decode("utf-8") < date:
+            if dup[0].decode("utf-8") > date:
                 new_list.append(dup[1].decode("utf-8"))
-            elif dup[0].decode("utf-8") <= date and equals_bool:
+            elif dup[0].decode("utf-8") >= date and equals_bool:
                 new_list.append(dup[1].decode("utf-8"))
             dup = da_curs.prev_dup()
 
