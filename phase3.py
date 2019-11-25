@@ -26,7 +26,8 @@ def main():
 
     while True:
         query = input("Enter a query in the format of field_of_interest: Press q to exit. ").lower() + ' '
-        if query == 'q ':
+        query = ' ' + query
+        if query == ' q ':
             break
 
         # get all the term queries
@@ -40,13 +41,16 @@ def main():
         print("date queries", date_queries)
 
         # get all the email address queries
-        email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
+        # email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
+        email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*\S+\s+', query)
         remove_whitespace(email_address_queries)
         print("email address queries", email_address_queries)
 
         # get all single term queries
         # need something to check no date, cc, from, to, bcc
-        single_term_queries = re.findall('(?:!subj)[0-9a-zA-Z_-]+%?\s+', query)
+        #pattern = re.compile("([0-9a-zA-Z_%-])\s+([0-9a-zA-Z_-]+%?)\s+")
+        #single_term_queries = pattern.sub(r'\2', query)
+        single_term_queries = re.findall('[0-9a-zA-Z_%-]\s+([0-9a-zA-Z_-]+%?\s+)', query)
         remove_whitespace(single_term_queries)
         print("single term queries", single_term_queries)
 
