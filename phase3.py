@@ -152,8 +152,11 @@ def dates_query(dates_queries):
         elif '>' in terms and '=' in terms:
             date_row = greater_date(terms[6:], True)
 
+        # this is the part where i check for intersection
+        # first if nothing is in final list we add our first term into it
         if not final_list:
             final_list += date_row
+            
         else:
             final_list = list(set(final_list) & set(date_row))
 
