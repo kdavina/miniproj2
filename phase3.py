@@ -68,10 +68,59 @@ def main():
         remove_whitespace(single_term_queries)
         print("single term queries", single_term_queries)
 
+        final_results(date_rows, False)
+
+
+def final_results(rows, mode):
+    for terms in rows:
+        result = re_curs.set(terms.encode("utf-8"))
+        if not mode:
+            output = re.search('<subj>(.*)</subj>', result[1].decode("utf-8"))
+            subject = output.group(1)
+            print('\nRow: '+terms+'\nSubject: '+subject)
+
 def remove_whitespace(replace_list):
     for list_index in range(len(replace_list)):
         replace_list[list_index] = replace_list[list_index].replace(" ","")
     return replace_list
+
+def email_query(email):
+    final_list = []
+    for terms in email:
+        if 'from' in terms:
+            parsed_email = re.sub('from:', 'from-',terms)
+            email_rows = find_email(parsed_email)
+        elif 'to' in terms:
+            parsed_email = re.sub('to:', 'to-', terms)
+            email_rows = find_email(parsed_email)
+        elif 'cc' in terms:
+            parsed_email = re.sub('cc:', 'cc-', terms)
+            email_rows = find_email(parsed_email)
+        elif 'bcc' in terms:
+            parsed_email = re.sub('bcc:', 'bcc-', terms)
+            email_rows = find_email(parsed_email)
+            
+        if not final_list:
+            final_list += email_rows
+        else:
+            final_list = list(set(final_list) & set(email_rows))
+
+        
+    return final_list
+
+            
+def find_email(email):
+    new_list = []
+    result = em_curs.set(email.encode("utf-8"))
+    if result != None:
+        new_list.append(result[1].decode("utf-8"))
+        duplicate = em_curs.next_dup()
+
+        while duplicate != None:
+            new_list.append(duplicate[1].decode("utf-8"))
+            duplicate = em_curs.next_dup()
+
+    return new_list
 
 # you have to be careful since we are indexing the actual string
 def dates_query(dates_queries):
@@ -95,8 +144,8 @@ def dates_query(dates_queries):
         else:
             final_list = list(set(final_list) & set(date_row))
 
-    for index in final_list:
-        print(index)
+    return final_list
+    
     # set gets rid of duplicates
     
 # since we are looking for rows with this exact date AND date is the key
@@ -163,5 +212,8 @@ def greater_date(date, equals_bool):
         result = da_curs.prev()
    
     return new_list
+
+
+    
 
 main()
