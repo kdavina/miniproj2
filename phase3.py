@@ -232,19 +232,20 @@ def termQuery(term_queries):
     
     print("\n", "List of all exact terms:", term_list)
 
+    duplicates = []
     for key in term_list:
         index = te_curs.set(key.encode("utf-8"))
         print(index)
+        print("results table before exact match search:", results)
         #print("index val:", index)
         if index != None:
             recID = (index[1].decode("utf-8"))
             if not results:
                 results.append(recID)
-            else:
-                results = list(set(results) & set(recID))
+            elif recID not in duplicates:
+                duplicates.append(recID)
             print("after including 1st result", results)
             dup = te_curs.next_dup()
-            duplicates = []
             while(dup!=None):
                 dup_index = (dup[1].decode("utf-8"))
                 if dup_index not in duplicates:
