@@ -175,6 +175,7 @@ def termQuery(term_queries):
     #print("term_queries:", term_queries)
     term_list = []
     results = []
+    pm = []
     for i in term_queries:
         if ":" in i:
             terms = i.split(":")
@@ -182,11 +183,11 @@ def termQuery(term_queries):
                 if "%" == terms[1][-1]:
                     partial_term = "s-" + terms[1][:-1]
                     p1 = partial_match(partial_term)
-                    if p1 and not results:
-                        # results += p1
-                        results.append(p1)
-                    else:
-                        results = list(set(results) & set(p1))
+                    if p1:
+                        if not results:
+                            results.extend(p1)
+                        else:
+                            results = list(set(results) & set(p1))
                     terms = []
                 else:
                     terms[0] = "s-" + terms[1]
@@ -195,71 +196,79 @@ def termQuery(term_queries):
                 if "%" == terms[1][-1]:
                     partial_term = "b-" + terms[1][:-1]
                     p2 = partial_match(partial_term)
-                    if p2 and not results:
-                        results += p2
-                    else:
-                        results = list(set(results) & set(p2))
+                    if p2:
+                        if not results:
+                            results.extend(p2)
+                        else:
+                            results = list(set(results) & set(p2))
                     terms = []
                 else:
                     terms[0] = "b-" + terms[1]
                     del terms[1]
-                    #print(terms)
-            # else:
-            #     #this else statement will never run since term_queries has already been checked for input validity
-            #     print("Invalid entry")
         elif "%" in i:
             partial_term = "b-" + i[:-1]
             p3 = partial_match(partial_term)
-            if p3 and not results:
-                results += p3
-            else:
-                results = list(set(results) & set(p3))
+            if p3:
+                if not results:
+                    results.extend(p3)
+                    pm.extend(p3)
+                    print(results)
+                else:
+                    pm.extend(p3)
             partial_term = "s-" + i[:-1]
             p4 = partial_match(partial_term)
-            if p4 and not results:
-                results += p4
-            else:
-                results = list(set(results) & set(p4))
+            print(pm)
+            if p4:
+                if not results:
+                    results.extend(p4)
+                elif p4 not in pm:
+                    pm.extend(p4)
+                    results = list(set(results) & set(pm))
+                else:
+                    results = list(set(results) & set(pm))
+                    
                 print("results table:", results)
             terms = []
         else:
             terms = [("b-"+i), ("s-"+i)]
-            #terms[0] = "s-" + i
-            #terms[1] = "b-" + i
-            #print(terms)
         
         for j in terms:
             term_list.append(j)
 
-    #print("only including partials:", results)
+    print("only including partials:", results)
     
     print("\n", "List of all exact terms:", term_list)
 
+    duplicates = []
     for key in term_list:
         index = te_curs.set(key.encode("utf-8"))
         print(index)
+        print("results table before exact match search:", results)
         #print("index val:", index)
         if index != None:
             recID = (index[1].decode("utf-8"))
             if not results:
                 results.append(recID)
-            else:
-                results = list(set(results) & set(recID))
+            elif recID not in duplicates:
+                duplicates.append(recID)
             print("after including 1st result", results)
             dup = te_curs.next_dup()
             while(dup!=None):
-                duplicates = (dup[1].decode("utf-8"))
+                dup_index = (dup[1].decode("utf-8"))
+                if dup_index not in duplicates:
+                    duplicates.append(dup_index)
                 #print(duplicates)
                 dup = te_curs.next_dup()
                 #dup = te_curs.next_dup()
                 #print(dup[0].decode("utf-8"))
                 print("before including duplicates:", results)
+                print("just the duplicates table:", duplicates)
             
             if not results:
-                results.append(duplicates)
+                results.extend(duplicates)
             else:
                 results = list(set(results) & set(duplicates))
-                print("after including duplicates:", results)    
+            print("after including duplicates:", results)
 
     print("\n", "Printing partial match results first, then exact match results:", "\n", results, "\n\n")    
     return results
@@ -275,7 +284,9 @@ def partial_match(partial_term):
     while index:
         #print("Try to match part of index key to partial term using:", index[0][:len(partial_term)].decode("utf-8"), "\n")
         if index[0][:len(partial_term)].decode("utf-8") == partial_term:
-            results_partial.append(index[1].decode("utf-8"))
+            pt_match = (index[1].decode("utf-8"))
+            if pt_match not in results_partial:
+                results_partial.append(pt_match)
             print("Partial matches:", partial_term)
             index = te_curs.next()
         else:
