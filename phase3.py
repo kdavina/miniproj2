@@ -27,7 +27,7 @@ em_curs = em_database.cursor()
 def main():
     output_mode = 'brief'
     while True:
-        print("output mode rn", output_mode)
+        print("\n", "Current Output Mode:", output_mode)
         final_rows = []
         query = input("Enter a query. Press q to exit. ").lower() + ' '
         if query == 'q ':
@@ -170,18 +170,24 @@ def remove_whitespace(replace_list):
     return replace_list
 
 
+# the termQuery function takes in inputs that contain keywords "subj" or "body"
+# it also takes in single-term query inputs
 def termQuery(term_queries):
-    #term_queries = ['subj:gas', 'body:the', 'subj:clos%', 'body:west%', 'fro%', 'closing']
-    #print("term_queries:", term_queries)
     term_list = []
     results = []
     pm = []
+    # iterate through list of inputted term_queries and process them based on format
+    # there are 5 different possibility for format:
+    # body:___, subj:___, body:___%, subj:___%, ____%, ____
     for i in term_queries:
         if ":" in i:
             terms = i.split(":")
             if terms[0] == "subj":
+                # checks for partial match in subject
                 if "%" == terms[1][-1]:
                     partial_term = "s-" + terms[1][:-1]
+                    # retrieve partial matches from partial_match function
+                    # intersect with results list if both are not empty
                     p1 = partial_match(partial_term)
                     if p1:
                         if not results:
@@ -189,12 +195,18 @@ def termQuery(term_queries):
                         else:
                             results = list(set(results) & set(p1))
                     terms = []
+                # checks for exact match in subject
                 else:
                     terms[0] = "s-" + terms[1]
                     del terms[1]
+
+
             elif terms[0] == "body":
+                # checks for partial match in body
                 if "%" == terms[1][-1]:
                     partial_term = "b-" + terms[1][:-1]
+                    # retrieve partial matches from partial_match function
+                    # intersect with results list if both are not empty
                     p2 = partial_match(partial_term)
                     if p2:
                         if not results:
@@ -202,98 +214,100 @@ def termQuery(term_queries):
                         else:
                             results = list(set(results) & set(p2))
                     terms = []
+                # checks for exact match in body
                 else:
                     terms[0] = "b-" + terms[1]
                     del terms[1]
+
+
+        # checks for partial match of single term
         elif "%" in i:
+            # checks for partial match in body first
+            # if both p3 and results not empty, adds to pm list
             partial_term = "b-" + i[:-1]
             p3 = partial_match(partial_term)
             if p3:
                 if not results:
                     results.extend(p3)
                     pm.extend(p3)
-                    print(results)
                 else:
                     pm.extend(p3)
+            # then checks for partial match in subject
             partial_term = "s-" + i[:-1]
             p4 = partial_match(partial_term)
-            print(pm)
             if p4:
                 if not results:
                     results.extend(p4)
+                # check to see if p4 has any records not in p3, and if it does, adds record to p4
                 elif p4 not in pm:
                     pm.extend(p4)
+                    # intersect pm list and results list to find common records in both
                     results = list(set(results) & set(pm))
                 else:
                     results = list(set(results) & set(pm))
-                    
-                print("results table:", results)
             terms = []
+
+
+        # checks for exact match of single term
         else:
             terms = [("b-"+i), ("s-"+i)]
         
+        # all exact terms to be searched on index file are added to term_list
         for j in terms:
             term_list.append(j)
 
-    print("only including partials:", results)
-    
-    print("\n", "List of all exact terms:", term_list)
 
     duplicates = []
+    # iterates through term_list and searches for index-key matches with any of the elements in term_list
     for key in term_list:
         index = te_curs.set(key.encode("utf-8"))
-        print(index)
-        print("results table before exact match search:", results)
-        #print("index val:", index)
+        # if there is a match, decode the index value (record ID) for the given key and add to duplicates list
         if index != None:
             recID = (index[1].decode("utf-8"))
             if not results:
                 results.append(recID)
             elif recID not in duplicates:
                 duplicates.append(recID)
-            print("after including 1st result", results)
+            # next check for duplicates of record (same key, different record ID)
             dup = te_curs.next_dup()
+            # if there are duplicates, decode index value (record ID) and add to duplicates table
             while(dup!=None):
                 dup_index = (dup[1].decode("utf-8"))
                 if dup_index not in duplicates:
                     duplicates.append(dup_index)
-                #print(duplicates)
                 dup = te_curs.next_dup()
-                #dup = te_curs.next_dup()
-                #print(dup[0].decode("utf-8"))
-                print("before including duplicates:", results)
-                print("just the duplicates table:", duplicates)
-            
+
+
+            # if results list is empty, simply add the duplicates list to results
+            # else, intersect the results list and the duplicates list to find intersecting record IDs
             if not results:
                 results.extend(duplicates)
             else:
                 results = list(set(results) & set(duplicates))
-            print("after including duplicates:", results)
 
-    print("\n", "Printing partial match results first, then exact match results:", "\n", results, "\n\n")    
     return results
 
 
+# partial_match function only runs if the last character in the input query is the wild card character "%"
+# it takes in as input the partial_term that was formulated within the termQuery function
 def partial_match(partial_term):
-    #print("\n\n", "This is the partial term parsed into partial match func:", partial_term)
     results_partial = []
-    
+    # partial matches are found using the cursor.set_range function which is a part of the imported db library
     index = te_curs.set_range((partial_term.encode("utf-8")))
-    #index = te_database.get((partial_term[0].encode("utf-8")))
-    #print("Results of curs.set_range:", index)
     while index:
-        #print("Try to match part of index key to partial term using:", index[0][:len(partial_term)].decode("utf-8"), "\n")
+        # this checks to see if the first n characters of the index key match the partial_term
+        # where n is the length of the partial term
         if index[0][:len(partial_term)].decode("utf-8") == partial_term:
             pt_match = (index[1].decode("utf-8"))
+            # if there is a match and index value is not in results_partial list, add it
             if pt_match not in results_partial:
                 results_partial.append(pt_match)
-            print("Partial matches:", partial_term)
             index = te_curs.next()
         else:
             break
     
-    print("Print record IDs for partial matches:", results_partial, "\n\n") 
     return results_partial
+
 
 # depending on the word, I replaced the values to match the xml file
 # then passed the newly formatted email into my find email function
