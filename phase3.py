@@ -81,7 +81,7 @@ def main():
         if term_rows:
             final_rows.append(term_rows)
         
-        #partial_matches = partial_match(partial_term)
+        # partial_matches = partial_match(partial_term)
 
 
         email_rows = email_query(correct_email_address_queries)
@@ -142,7 +142,8 @@ def termQuery(term_queries):
                     partial_term = "s-" + terms[1][:-1]
                     p1 = partial_match(partial_term)
                     if p1 and not results:
-                        results += p1
+                        # results += p1
+                        results.append(p1)
                     else:
                         results = list(set(results) & set(p1))
                     terms = []
@@ -196,6 +197,7 @@ def termQuery(term_queries):
 
     for key in term_list:
         index = te_curs.set(key.encode("utf-8"))
+        print(index)
         #print("index val:", index)
         if index != None:
             recID = (index[1].decode("utf-8"))
@@ -204,15 +206,15 @@ def termQuery(term_queries):
             else:
                 results = list(set(results) & set(recID))
             print("after including 1st result", results)
-        dup = te_curs.next_dup()
-        while(dup!=None):
-            duplicates = (dup[1].decode("utf-8"))
-            #print(duplicates)
             dup = te_curs.next_dup()
-            #dup = te_curs.next_dup()
-            #print(dup[0].decode("utf-8"))
-            print("before including duplicates:", results)
-        
+            while(dup!=None):
+                duplicates = (dup[1].decode("utf-8"))
+                #print(duplicates)
+                dup = te_curs.next_dup()
+                #dup = te_curs.next_dup()
+                #print(dup[0].decode("utf-8"))
+                print("before including duplicates:", results)
+            
             if not results:
                 results.append(duplicates)
             else:
