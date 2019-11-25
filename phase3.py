@@ -125,9 +125,9 @@ def remove_whitespace(replace_list):
     return replace_list
 
 
-def termQuery():
-    term_queries = ['subj:gas', 'body:the', 'subj:clos%', 'body:west%', 'fro%', 'closing']
-    print("term_queries:", term_queries)
+def termQuery(term_queries):
+    #term_queries = ['subj:gas', 'body:the', 'subj:clos%', 'body:west%', 'fro%', 'closing']
+    #print("term_queries:", term_queries)
     new_list = []
     for i in term_queries:
         if ":" in i:
