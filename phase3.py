@@ -71,7 +71,6 @@ def main():
         #single_term_queries = pattern.sub(r'\2', query)
         #single_term_queries = re.findall('(?<![:]\s*)([0-9a-zA-Z_-]+%?)\s+', query)
         #remove_whitespace(single_term_queries)
-        single_term_query(['body:october%'])
         #this is the intersection part, you may get a combination where they all return nothing
         if len(final_rows) == 0:
             print('No results with those conditions')
@@ -84,25 +83,6 @@ def main():
             # replace false with whatever variable you're setting output as davina
             final_results(final_rows[0], False)
 
-def single_term_query(partial_term):
-    for term in partial_term:
-        if 'body' in term and "%" in term:
-            output = re.sub('body:', 'b-', term[:-1])
-            partial_list = find_term_match(output)
-    for index in partial_list:
-        print(index)
-
-def find_term_match(term):
-    new_list = []
-    result = te_curs.set_range(term.encode("utf-8"))
-    while result != None:
-        if result[1].decode("utf-8") in term:
-            new_list.append(result[1].decode("utf-8"))
-        else:
-            break
-        result = te_curs.next()
-
-    return new_list
 
 def final_results(rows, mode):
     for terms in rows:
@@ -158,6 +138,7 @@ def termQuery():
         elif "%" in i:
             i = i[:-1]
             partial_term = [("s-"+i), ("b-"+i)]
+            print(partial_term)
             partial_match(partial_term)
             terms = []
         else:
@@ -194,8 +175,8 @@ def termQuery():
 def partial_match(partial_term):
 
     partial_recID = []
-    print("in partial matching for term:", partial_term)
-    index = te_curs.set_range((partial_term[0].encode("utf-8")))
+    print(partial_term)
+    index = te_curs.set_range((partial_term.encode("utf-8")))
     #index = te_database.get(partial_term[0].encode("utf-8"))
     print(index)
     
@@ -255,7 +236,7 @@ def find_email(email):
 
     return new_list
 
-# you have to be careful since we are indexing the actual string
+
 def dates_query(dates_queries):
     final_list = []
     for terms in dates_queries:
