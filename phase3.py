@@ -40,6 +40,8 @@ def main():
             continue
         remove_whitespace(correct_term_queries)
 
+        termQuery()
+
         # get all the date queries
         correct_date_queries = re.findall('date\s*[<>:][=]?\s*\d\d\d\d[/]\d\d[/]\d\d\s+', query)
         all_date_queries = re.findall('date', query)
@@ -122,6 +124,88 @@ def remove_whitespace(replace_list):
     for list_index in range(len(replace_list)):
         replace_list[list_index] = replace_list[list_index].replace(" ","")
     return replace_list
+
+
+def termQuery():
+    term_queries = ['subj:gas', 'body:the', 'subj:clos%', 'body:west%', 'from%', 'closing']
+    print("term_queries:", term_queries)
+    new_list = []
+    for i in term_queries:
+        if ":" in i:
+            terms = i.split(":")
+            print(terms)
+            if terms[0] == "subj":
+                if "%" == terms[1][-1]:
+                    partial_term = "s-" + terms[1][:-1]
+                    partial_match(partial_term)
+                    terms = []
+                else:
+                    terms[0] = "s-" + terms[1]
+                    del terms[1]
+                    print(terms)
+            elif terms[0] == "body":
+                if "%" == terms[1][-1]:
+                    partial_term = "b-" + terms[1][:-1]
+                    partial_match(partial_term)
+                    terms = []
+                else:
+                    terms[0] = "b-" + terms[1]
+                    del terms[1]
+                    print(terms)
+            # else:
+            #     #this else statement will never run since term_queries has already been checked for input validity
+            #     print("Invalid entry")
+        elif "%" in i:
+            i = i[:-1]
+            partial_term = [("s-"+i), ("b-"+i)]
+            partial_match(partial_term)
+            terms = []
+        else:
+            terms = [("s-"+i), ("b-"+i)]
+            #terms[0] = "s-" + i
+            #terms[1] = "b-" + i
+            print(terms)
+        
+        for j in terms:
+            new_list.append(j)
+    
+    print("List of all indexes:", new_list)
+
+    for key in new_list:
+        index = te_curs.set(key.encode("utf-8"))
+        print("index val:", index)
+        results = []
+        if index != None:
+            recID = (index[1].decode("utf-8"))
+            results.append(recID)
+        dup = te_curs.next_dup()
+        while(dup!=None):
+            duplicates = (dup[1].decode("utf-8"))
+            #print(duplicates)
+            dup = te_curs.next_dup()
+            #dup = te_curs.next_dup()
+            #print(dup[0].decode("utf-8"))
+        
+            
+            results.append(duplicates)
+            print("print recIDs:", results)
+
+
+def partial_match(partial_term):
+
+    partial_recID = []
+    print("in partial matching for term:", partial_term)
+    index = te_curs.set_range((partial_term[0].encode("utf-8")))
+    #index = te_database.get(partial_term[0].encode("utf-8"))
+    print(index)
+    
+    while index:
+        if index[0][:len(partial_term)].decode("utf-8") == partial_term:
+            partial_recID.append(index[1].decode("utf-8"))
+            print("Partial matches:", partial_term)
+            index = te_curs.next()
+        else:
+            break
 
 # depending on the word, I replaced the values to match the xml file
 # then passed the newly formatted email into my find email function
