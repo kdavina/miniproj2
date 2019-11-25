@@ -1,4 +1,5 @@
 import re 
+import sys
 
 terms_file = open('terms.txt','w')
 emails_file = open('emails.txt', 'w')
@@ -6,7 +7,7 @@ dates_file = open('dates.txt', 'w')
 recs_file = open('recs.txt','w')
 
 def main():
-    filename = 'test10.xml'
+    filename = sys.argv[1]
     xml_content = open(filename).read()
 
     # parse the row number, subject, body, emails, dates, and records into different lists
@@ -98,4 +99,5 @@ def create_record_file(filename, row_numbers):
             if result != None:
                 recs_file.write(row_numbers[i] +':'+result.group(0)+'\n')
                 i += 1 
+
 main()
