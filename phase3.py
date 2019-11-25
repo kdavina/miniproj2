@@ -33,19 +33,34 @@ def main():
             break
 
         # get all the term queries
-        term_queries = re.findall('(?:subj|body)\s*:\s*[0-9a-zA-Z_-]+%?\s+', query)
-        remove_whitespace(term_queries)
+        correct_term_queries = re.findall('(?:subj|body)\s*:\s*[0-9a-zA-Z_-]+%?\s+', query, )
+        all_term_queries = re.findall('subj|body', query)
+        if len(correct_term_queries) != len(all_term_queries):
+            print("Incorrect query syntax")
+            continue
+        remove_whitespace(correct_term_queries)
+        print("term queries", correct_term_queries)
 
-        # get all the date queries 
-        date_queries = re.findall('date\s*[<>:][=]?\s*\d\d\d\d[/]\d\d[/]\d\d\s+', query)
-        remove_whitespace(date_queries)
-        date_rows = dates_query(date_queries)
+        # get all the date queries
+        correct_date_queries = re.findall('date\s*[<>:][=]?\s*\d\d\d\d[/]\d\d[/]\d\d\s+', query)
+        all_date_queries = re.findall('date', query)
+        if len(correct_date_queries) != len(all_date_queries):
+            print("Incorrect query syntax")
+            continue
+        remove_whitespace(correct_date_queries)
+        print("date queries", correct_date_queries)
+        date_rows = dates_query(correct_date_queries)
         if date_rows:
             final_rows.append(date_rows)
 
-        # email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
-        email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*\S+\s+', query)
-        remove_whitespace(email_address_queries)
+        # get all the email address queries
+        correct_email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
+        all_email_address_queries = re.findall('from|to|cc|bcc', query)
+        if len(correct_email_address_queries) != len(all_email_address_queries):
+            print("Incorrect query syntax")
+            continue
+        remove_whitespace(correct_email_address_queries)
+        print("email address queries", correct_email_address_queries)
         email_rows = email_query(email_address_queries)
         if email_rows:
             final_rows.append(email_rows)
@@ -54,10 +69,10 @@ def main():
         # need something to check no date, cc, from, to, bcc
         #pattern = re.compile("([0-9a-zA-Z_%-])\s+([0-9a-zA-Z_-]+%?)\s+")
         #single_term_queries = pattern.sub(r'\2', query)
-        single_term_queries = re.findall('[0-9a-zA-Z_%-]\s+([0-9a-zA-Z_-]+%?\s+)', query)
+        single_term_queries = re.findall('(?<![:]\s*)([0-9a-zA-Z_-]+%?)\s+', query)
         remove_whitespace(single_term_queries)
         
-        
+        #this is the intersection part
         while len(final_rows) > 1:
             final_rows[0] = list(set(final_rows[0]) & set(final_rows[1]))
             del final_rows[1]
@@ -156,7 +171,7 @@ def dates_query(dates_queries):
         # first if nothing is in final list we add our first term into it
         if not final_list:
             final_list += date_row
-            
+
         else:
             final_list = list(set(final_list) & set(date_row))
 
