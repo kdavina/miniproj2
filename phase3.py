@@ -135,24 +135,25 @@ def main():
             final_results(final_rows[0], output_mode)
 
 
-
+# after intersecting, rows is our final row numbers to index
 def final_results(rows, mode):
     if rows:
+        # for each value in rows we find the index in re.idx 
+        # depending on the mode we either want to find subj or the entire thing
+        # print out the output
         for terms in rows:
             result = re_curs.set(terms.encode("utf-8"))
             if mode == 'brief':
                 output = re.search('<subj>(.*)</subj>', result[1].decode("utf-8"))
                 subject = output.group(1)
                 subject = replace_char(subject)
-                if subject == '':
-                    subject = 'No subject found'
                 print('\nRow: '+terms+'\nSubject: '+subject)
 
             else:
                 print('\nRow: '+terms)
                 print(result[1].decode("utf-8"))
     else:
-        print('\nRow: \nSubject: ')
+        print("No results with those conditions")
 
     print('\n')
 
@@ -334,7 +335,9 @@ def find_email(email):
 
     return new_list
 
-
+# we have multiple options for all the terms in date queries
+# depending on the symbol run a certain function
+# add that to our final list for intersection and to return
 def dates_query(dates_queries):
     final_list = []
     for terms in dates_queries:
@@ -352,7 +355,7 @@ def dates_query(dates_queries):
             date_row = greater_date(terms[6:], True)
 
         # this is the part where i check for intersection
-        # first if nothing is in final list we add our first term into it
+        # look for email intersection for explanation
         if not final_list:
             final_list += date_row
 
@@ -379,8 +382,16 @@ def exact_date(date):
 
 def less_date(date, equals_bool):
     new_list = []
+    #set our cursor to the smallest value (since its a btree)
     result = da_curs.first()
+    
     while result != None:
+        # append the row number if it satisfies the condition
+        # note that in order to append to new_list for <= the equals_bool has to be true aka
+        # the user input is <= and not <
+        # also note that since we are starting at the smallest value, if the value is not smaller than the date
+        # all dates after it will also not be smaller
+        # for optimization, break out of the loop
         if result[0].decode("utf-8") < date :
             new_list.append(result[1].decode("utf-8"))
 
@@ -410,6 +421,7 @@ def greater_date(date, equals_bool):
     result = da_curs.last()
     
     # we check of our largest date is greater than the input date
+    # similar to less_date except we go backwards
     while result != None:
         if result[0].decode("utf-8") > date:
             new_list.append(result[1].decode("utf-8"))
@@ -421,9 +433,9 @@ def greater_date(date, equals_bool):
         #checking for duplicates
         dup = da_curs.next_dup()
         while dup != None:
-            if dup[0].decode("utf-8") < date:
+            if dup[0].decode("utf-8") > date:
                 new_list.append(dup[1].decode("utf-8"))
-            elif dup[0].decode("utf-8") <= date and equals_bool:
+            elif dup[0].decode("utf-8") >= date and equals_bool:
                 new_list.append(dup[1].decode("utf-8"))
             dup = da_curs.prev_dup()
 
