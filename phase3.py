@@ -49,13 +49,6 @@ def main():
 
         # get all the term queries
         correct_term_queries = re.findall('(?:subj|body)\s*:\s*[0-9a-zA-Z_-]+%?\s+', query, )
-        all_term_queries = re.findall('subj|body', query)
-        if len(correct_term_queries) != len(all_term_queries):
-            print("Incorrect query syntax")
-            continue
-        #changed 
-        remove_whitespace(correct_term_queries)
-        correct_term_queries = re.findall('(?:subj|body)\s*:\s*[0-9a-zA-Z_-]+%?\s+', query)
         for t_query in correct_term_queries:
             query = query.replace(t_query, "")
         correct_term_queries = remove_whitespace(correct_term_queries)
@@ -70,7 +63,7 @@ def main():
         print("date queries", correct_date_queries)
 
         # get all the email address queries
-        correct_email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_.]+@[0-9a-zA-Z-_.]+\s+', query)
+        correct_email_address_queries = re.findall('(?:from|to|cc|bcc)\s*:\s*[0-9a-zA-Z-_]+[.]?[0-9a-zA-Z-_]+[@][0-9a-zA-Z-_]+[.]?[0-9a-zA-Z-_]+\s+', query)
         for ad_query in correct_email_address_queries:
             query = query.replace(ad_query, "")
         correct_email_address_queries = remove_whitespace(correct_email_address_queries)
@@ -284,7 +277,6 @@ def termQuery(term_queries):
                 results.extend(duplicates)
             else:
                 results = list(set(results) & set(duplicates))
-
     return results
 
 
